@@ -24,10 +24,22 @@ const generateToken = (user) => {
  */
 const decodeGoogleCredential = (credential) => {
   try {
+    if (!credential || typeof credential !== 'string') return null;
     const parts = credential.split('.');
     if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
-    return JSON.parse(payload);
+
+    let payloadStr;
+    try {
+      payloadStr = Buffer.from(parts[1], 'base64url').toString('utf-8');
+    } catch {
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) {
+        base64 += '=';
+      }
+      payloadStr = Buffer.from(base64, 'base64').toString('utf-8');
+    }
+
+    return JSON.parse(payloadStr);
   } catch (err) {
     return null;
   }
