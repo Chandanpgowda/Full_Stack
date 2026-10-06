@@ -3,9 +3,11 @@
  */
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash'
+  'gemini-flash-latest',
+  'gemini-3.8-flash',
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash-lite'
 ];
 
 /**
@@ -42,13 +44,10 @@ async function callGeminiApi(apiKey, contents, systemPrompt) {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMsg = data?.error?.message || `HTTP ${response.status} from Gemini API`;
-        // If model not found (404), try next fallback model
-        if (response.status === 404) {
-          lastError = new Error(errorMsg);
-          continue;
-        }
-        throw new Error(errorMsg);
+        const errorMsg = data?.error?.message || `HTTP ${response.status} from Gemini API (${model})`;
+        lastError = new Error(errorMsg);
+        // Continue to fallback model on 404, 429, 503, high-demand
+        continue;
       }
 
       const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
@@ -78,7 +77,7 @@ exports.getStatus = (req, res) => {
   res.status(200).json({
     success: true,
     hasServerKey: hasEnvKey,
-    recommendedModel: 'gemini-2.5-flash'
+    recommendedModel: 'gemini-3.8-flash'
   });
 };
 
