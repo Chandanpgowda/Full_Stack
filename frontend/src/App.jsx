@@ -373,8 +373,8 @@ const MainApp = ({ authUser, onSignOut }) => {
           detail="medium"
           brightness={1.2}
           opacity={1.0}
-          mouseInteraction={true}
-          parallaxStrength={0.3}
+          mouseInteraction={false}
+          parallaxStrength={0}
           grain={true}
           grainIntensity={0.04}
         />

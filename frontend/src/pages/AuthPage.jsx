@@ -255,8 +255,8 @@ export const AuthPage = ({ onAuthenticated }) => {
           detail="medium"
           brightness={1.1}
           opacity={0.75}
-          mouseInteraction={true}
-          parallaxStrength={0.35}
+          mouseInteraction={false}
+          parallaxStrength={0}
           grain={true}
           grainIntensity={0.04}
         />
