@@ -43,22 +43,24 @@ Before Google gives you a Client ID, you must define the consent screen:
 5. Under **Authorized JavaScript origins**, click **+ Add URI** and add:
    - For local development:
      ```
+     http://localhost:5173
      http://localhost:3000
-     http://localhost:3001
      ```
-   - For production (your Render frontend URL):
+   - For production (your exact Render URL from the browser bar):
      ```
-     https://ems-frontend.onrender.com
+     https://ems-frontend-kevz.onrender.com
      ```
+   *(⚠️ Important: Do NOT include a trailing slash `/` at the end of the URI!)*
+
 6. Under **Authorized redirect URIs**, click **+ Add URI** and add:
    - For local development:
      ```
+     http://localhost:5173
      http://localhost:3000
-     http://localhost:3001
      ```
    - For production:
      ```
-     https://ems-frontend.onrender.com
+     https://ems-frontend-kevz.onrender.com
      ```
 7. Click **Create**.
 8. A popup will show:
