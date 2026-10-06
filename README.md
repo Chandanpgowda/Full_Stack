@@ -228,6 +228,7 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 ## 12. REST API Endpoints
 
+### Employee Management
 | Method | Endpoint | Description | Status Codes |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/health` | Service & database health check | `200`, `503` |
@@ -236,6 +237,36 @@ VITE_API_BASE_URL=http://localhost:5000/api
 | `GET` | `/api/employees/:id` | Retrieve a single employee by ID | `200`, `400`, `404`, `500` |
 | `PUT` | `/api/employees/:id` | Update an existing employee profile | `200`, `400`, `404`, `409`, `500` |
 | `DELETE` | `/api/employees/:id` | Delete an employee record | `200`, `400`, `404`, `500` |
+
+### Task Management
+| Method | Endpoint | Description | Status Codes |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/tasks` | Create a task (title, description, status, priority, dueDate, assignedTo) | `201`, `400`, `404`, `500` |
+| `GET` | `/api/tasks` | List tasks with search (`search`/`title`), filtering (`status`, `priority`, `assignedTo`) & pagination | `200`, `500` |
+| `GET` | `/api/tasks/:id` | Retrieve a single task by ID | `200`, `400`, `404`, `500` |
+| `PUT` | `/api/tasks/:id` | Update task fields (title, description, status, priority, dueDate, assignedTo) | `200`, `400`, `404`, `500` |
+| `DELETE` | `/api/tasks/:id` | Delete a task by ID | `200`, `400`, `404`, `500` |
+
+#### Valid Task Status & Priority Values
+- **Valid Status Values**:
+  - `Pending` (Default): Task created, waiting to be started.
+  - `In Progress`: Task currently in development or active execution.
+  - `Completed`: Task finished and verified.
+- **Valid Priority Values**:
+  - `Low`: Low-impact item.
+  - `Medium` (Default): Normal operational priority.
+  - `High`: Urgent or high-value deliverable.
+  - `Urgent`: Critical item requiring immediate attention.
+
+#### Task Query Parameters for `GET /api/tasks`
+- `search` / `title`: Case-insensitive regex match against task title (and description).
+- `status`: Case-insensitive filter matching valid status values (`Pending`, `In Progress`, `Completed`).
+- `priority`: Case-insensitive filter matching valid priority values (`Low`, `Medium`, `High`, `Urgent`).
+- `assignedTo`: Filter by assigned employee MongoDB ObjectId.
+- `page`: Page number (default: `1`).
+- `limit`: Number of items per page (default: `20`, set `0` for all).
+- `sortBy`: Field to sort by (`createdAt`, `dueDate`, `priority`, `title`).
+- `order`: `asc` or `desc` (default: `desc`).
 
 ---
 
