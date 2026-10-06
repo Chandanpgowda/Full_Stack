@@ -86,12 +86,14 @@ export const AuthPage = ({ onAuthenticated }) => {
   const [gsiBtnReady, setGsiBtnReady] = useState(false);
 
   const googleBtnRef = useRef(null);
+  // Use a ref for the credential callback so GSI.initialize() is never called twice
+  const credentialCallbackRef = useRef(null);
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  /* ── Google credential callback ── */
+  /* ── Google credential callback (stable ref – never recreated) ── */
   const handleGoogleCredentialResponse = useCallback(async (response) => {
     try {
       setIsLoading(true);
@@ -110,7 +112,10 @@ export const AuthPage = ({ onAuthenticated }) => {
     }
   }, [onAuthenticated, showToast]);
 
-  /* ── Load Google GSI SDK & initialize ── */
+  // Keep the ref in sync with the latest callback without triggering re-initialization
+  useEffect(() => { credentialCallbackRef.current = handleGoogleCredentialResponse; }, [handleGoogleCredentialResponse]);
+
+  /* ── Load Google GSI SDK & initialize ONCE ── */
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
@@ -118,13 +123,17 @@ export const AuthPage = ({ onAuthenticated }) => {
       return;
     }
 
+    // Wrapper that delegates to the latest ref — avoids reinitializing GSI
+    const stableCallback = (resp) => credentialCallbackRef.current?.(resp);
+
     const initGoogle = () => {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGoogleCredentialResponse,
+          callback: stableCallback,
           auto_select: false,
           cancel_on_tap_outside: true,
+          use_fedcm_for_prompt: false, // disable FedCM to avoid navigator.credentials conflicts
         });
         setGsiBtnReady(true);
       } catch (e) {
@@ -144,7 +153,7 @@ export const AuthPage = ({ onAuthenticated }) => {
       script.onerror = () => console.error('Failed to load Google GSI script');
       document.body.appendChild(script);
     }
-  }, [handleGoogleCredentialResponse]);
+  }, []); // ← empty deps: runs exactly once on mount
 
   /* ── Render official Google button whenever container is ready ── */
   useEffect(() => {
