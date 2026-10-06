@@ -28,25 +28,25 @@ export const getInitials = (name) => {
 };
 
 /**
- * Deterministically pick an avatar color based on name string
+ * Deterministically pick a vibrant gradient avatar background based on name string
  */
-const AVATAR_COLORS = [
-  'bg-blue-600 text-white',
-  'bg-emerald-600 text-white',
-  'bg-purple-600 text-white',
-  'bg-amber-600 text-white',
-  'bg-rose-600 text-white',
-  'bg-indigo-600 text-white',
-  'bg-teal-600 text-white',
-  'bg-cyan-600 text-white'
+const AVATAR_GRADIENTS = [
+  'bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-sm shadow-violet-500/20',
+  'bg-gradient-to-tr from-pink-600 to-rose-600 text-white shadow-sm shadow-pink-500/20',
+  'bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-sm shadow-cyan-500/20',
+  'bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-sm shadow-emerald-500/20',
+  'bg-gradient-to-tr from-amber-500 to-orange-600 text-white shadow-sm shadow-amber-500/20',
+  'bg-gradient-to-tr from-purple-600 to-pink-600 text-white shadow-sm shadow-purple-500/20',
+  'bg-gradient-to-tr from-teal-500 to-cyan-600 text-white shadow-sm shadow-teal-500/20',
+  'bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-sm shadow-indigo-500/20'
 ];
 
 export const getAvatarBg = (name) => {
-  if (!name) return AVATAR_COLORS[0];
+  if (!name) return AVATAR_GRADIENTS[0];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
+  const index = Math.abs(hash) % AVATAR_GRADIENTS.length;
+  return AVATAR_GRADIENTS[index];
 };

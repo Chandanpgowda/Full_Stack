@@ -3,12 +3,13 @@ import {
   Users2,
   LayoutDashboard,
   UserPlus,
-  Activity,
   CheckCircle2,
   AlertCircle,
-  Code2,
   CheckSquare,
-  Plus
+  Plus,
+  Zap,
+  Activity,
+  Code2
 } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -22,185 +23,143 @@ export const Navbar = ({
   totalCount = 0,
   taskCount = 0
 }) => {
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'employees', label: 'Directory', icon: Users2, count: totalCount, countColor: 'bg-violet-500/30 text-violet-300' },
+    { id: 'tasks', label: 'Tasks', icon: CheckSquare, count: taskCount, countColor: 'bg-pink-500/30 text-pink-300' },
+  ];
+
   return (
-    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <header className="sticky top-0 z-40 glass-dark border-b border-white/6 shadow-2xl">
+      {/* Animated top border */}
+      <div className="h-px w-full grad-animated opacity-70" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand Logo & Title */}
-          <div className="flex items-center gap-8">
-            <div
-              className="flex items-center gap-3 cursor-pointer group"
-              onClick={() => setActiveTab('dashboard')}
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                <Users2 className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-base text-slate-900 tracking-tight flex items-center gap-2">
-                  EMS Portal
-                  <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">
-                    Pro
-                  </span>
-                </span>
-                <p className="text-[11px] text-slate-500 hidden sm:block">
-                  Workforce & Task Management
-                </p>
-              </div>
+        <div className="flex items-center justify-between h-16 gap-4">
+
+          {/* Brand */}
+          <div
+            className="flex items-center gap-3 cursor-pointer group shrink-0"
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <div className="relative w-10 h-10 rounded-2xl grad-purple-pink flex items-center justify-center shadow-lg glow-purple group-hover:scale-110 transition-transform duration-300">
+              <Zap className="w-5 h-5 text-white" />
+              <div className="absolute inset-0 rounded-2xl grad-purple-pink opacity-0 group-hover:opacity-100 blur-md transition-opacity" />
             </div>
-
-            {/* Navigation Tabs */}
-            <nav className="hidden md:flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setActiveTab('dashboard')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'dashboard'
-                    ? 'bg-indigo-50 text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('employees')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'employees'
-                    ? 'bg-indigo-50 text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-                }`}
-              >
-                <Users2 className="w-4 h-4" />
-                Directory
-                {totalCount > 0 && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 text-slate-700 ml-0.5">
-                    {totalCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('tasks')}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'tasks'
-                    ? 'bg-indigo-50 text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-                }`}
-              >
-                <CheckSquare className="w-4 h-4" />
-                Tasks
-                {taskCount > 0 && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 ml-0.5">
-                    {taskCount}
-                  </span>
-                )}
-              </button>
-            </nav>
+            <div className="hidden sm:block">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-base text-white tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  EMS Portal
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                  Pro
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-500 leading-none mt-0.5">Workforce Management</p>
+            </div>
           </div>
 
-          {/* Right Section: System Health & Add Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* API Docs Button */}
+          {/* Navigation Tabs */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/4 rounded-2xl p-1 border border-white/6">
+            {navItems.map(({ id, label, icon: Icon, count, countColor }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
+                  activeTab === id
+                    ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-white/6'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+                {count > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === id ? 'bg-white/20 text-white' : countColor}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* API Docs */}
             <button
               type="button"
               onClick={onOpenDocs}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
-              title="View REST API Documentation"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-violet-300 hover:bg-violet-500/10 border border-transparent hover:border-violet-500/20 transition-all"
             >
-              <Code2 className="w-4 h-4 text-slate-400" />
-              API Docs
+              <Code2 className="w-3.5 h-3.5" />
+              API
             </button>
 
-            {/* Health Indicator */}
+            {/* Server Status */}
             <div
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
                 serverStatus === 'healthy'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
                   : serverStatus === 'unhealthy'
-                  ? 'bg-rose-50 text-rose-700 border-rose-200'
-                  : 'bg-slate-50 text-slate-600 border-slate-200'
+                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                  : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
               }`}
-              title={
-                serverStatus === 'healthy'
-                  ? 'Backend API and MongoDB Atlas/Local are connected'
-                  : 'Connecting to server...'
-              }
             >
               {serverStatus === 'healthy' ? (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3 h-3" />
               ) : serverStatus === 'unhealthy' ? (
-                <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                <AlertCircle className="w-3 h-3" />
               ) : (
-                <Activity className="w-3.5 h-3.5 text-slate-400 animate-pulse" />
+                <Activity className="w-3 h-3 animate-pulse" />
               )}
               <span className="capitalize">{serverStatus}</span>
             </div>
 
-            {/* Quick Add Task Button */}
+            {/* Add Task */}
             <Button
               variant="secondary"
               size="sm"
-              icon={Plus}
+              icon={CheckSquare}
               onClick={onOpenAddTaskModal}
               className="hidden sm:inline-flex"
             >
-              Add Task
+              Task
             </Button>
 
-            {/* Quick Add Employee Button */}
+            {/* Add Employee */}
             <Button
               variant="primary"
               size="sm"
               icon={UserPlus}
               onClick={onOpenAddModal}
-              className="shadow-sm hover:shadow-md"
             >
-              Add Employee
+              <span className="hidden sm:block">Employee</span>
             </Button>
           </div>
         </div>
 
-        {/* Mobile Sub-Navigation Bar */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-              activeTab === 'dashboard'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-slate-600'
-            }`}
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            Dashboard
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('employees')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-              activeTab === 'employees'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-slate-600'
-            }`}
-          >
-            <Users2 className="w-3.5 h-3.5" />
-            Directory ({totalCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-              activeTab === 'tasks'
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-slate-600'
-            }`}
-          >
-            <CheckSquare className="w-3.5 h-3.5" />
-            Tasks ({taskCount})
-          </button>
+        {/* Mobile Tab Bar */}
+        <div className="flex md:hidden items-center justify-around py-1.5 border-t border-white/5">
+          {navItems.map(({ id, label, icon: Icon, count }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === id
+                  ? 'bg-violet-600/20 text-violet-300 border border-violet-500/30'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+              {count > 0 && (
+                <span className="text-[9px] font-bold px-1 py-0.5 rounded-full bg-white/10 text-slate-300">
+                  {count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </header>

@@ -21,7 +21,6 @@ export const EmployeePagination = ({
   const startIdx = total === 0 ? 0 : (page - 1) * limit + 1;
   const endIdx = Math.min(page * limit, total);
 
-  // Generate page numbers array with simple range
   const getPageNumbers = () => {
     const pages = [];
     const maxButtons = 5;
@@ -39,24 +38,24 @@ export const EmployeePagination = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 bg-white/50 backdrop-blur-xs rounded-2xl border border-slate-200/80 px-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3.5 px-4 glass-card border border-white/10">
       {/* Items count & Per-page selector */}
-      <div className="flex items-center gap-3 text-xs text-slate-600">
+      <div className="flex items-center gap-3 text-xs text-slate-400">
         <span>
-          Showing <strong className="text-slate-900">{startIdx}</strong> to{' '}
-          <strong className="text-slate-900">{endIdx}</strong> of{' '}
-          <strong className="text-slate-900">{total}</strong> results
+          Showing <strong className="text-white font-semibold">{startIdx}</strong> to{' '}
+          <strong className="text-white font-semibold">{endIdx}</strong> of{' '}
+          <strong className="text-white font-semibold">{total}</strong> results
         </span>
 
-        <div className="flex items-center gap-1.5 ml-2 pl-3 border-l border-slate-200">
+        <div className="flex items-center gap-2 ml-2 pl-3 border-l border-white/10">
           <span>Per page:</span>
           <select
             value={limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
-            className="rounded-lg border border-slate-300 py-1 px-2 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="rounded-xl border border-white/10 py-1 px-2.5 text-xs font-semibold text-white bg-white/5 focus:outline-none focus:border-violet-500 cursor-pointer"
           >
             {PAGE_SIZE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
+              <option key={opt} value={opt} style={{ background: '#131326', color: '#fff' }}>
                 {opt}
               </option>
             ))}
@@ -65,29 +64,27 @@ export const EmployeePagination = ({
       </div>
 
       {/* Page navigation buttons */}
-      <div className="flex items-center gap-1">
-        {/* Previous Button */}
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={!hasPrevPage}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Previous page"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {/* Number buttons */}
         <div className="flex items-center gap-1">
           {getPageNumbers().map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => onPageChange(p)}
-              className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
+              className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
                 p === page
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'grad-purple-pink text-white shadow-md glow-purple scale-105'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {p}
@@ -95,12 +92,11 @@ export const EmployeePagination = ({
           ))}
         </div>
 
-        {/* Next Button */}
         <button
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={!hasNextPage}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Next page"
         >
           <ChevronRight className="w-4 h-4" />

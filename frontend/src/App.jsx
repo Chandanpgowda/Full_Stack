@@ -296,7 +296,12 @@ const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#0a0a1a] text-slate-100 selection:bg-violet-600 selection:text-white relative overflow-x-hidden">
+      {/* Ambient background glowing orbs */}
+      <div className="bg-orb w-96 h-96 bg-violet-600/15 -top-20 -left-20 animate-float" />
+      <div className="bg-orb w-[30rem] h-[30rem] bg-pink-600/10 top-1/3 -right-32 animate-float" style={{ animationDelay: '2s' }} />
+      <div className="bg-orb w-80 h-80 bg-cyan-600/10 bottom-10 left-1/4 animate-float" style={{ animationDelay: '4s' }} />
+
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
@@ -310,7 +315,7 @@ const MainApp = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
         {activeTab === 'dashboard' ? (
           <DashboardPage
             employees={allEmployees.length > 0 ? allEmployees : employees}
@@ -418,7 +423,7 @@ const MainApp = () => {
         message={
           <span>
             Are you sure you want to permanently delete the profile for{' '}
-            <strong className="text-slate-900">{employeeToDelete?.name}</strong> (
+            <strong className="text-white">{employeeToDelete?.name}</strong> (
             {employeeToDelete?.email})? This action cannot be undone.
           </span>
         }
@@ -440,7 +445,7 @@ const MainApp = () => {
         message={
           <span>
             Are you sure you want to delete the task{' '}
-            <strong className="text-slate-900">"{taskToDelete?.title}"</strong>?
+            <strong className="text-white">"{taskToDelete?.title}"</strong>?
           </span>
         }
         confirmText="Yes, Delete Task"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserPlus, RefreshCw, AlertCircle, Download } from 'lucide-react';
+import { UserPlus, RefreshCw, AlertCircle, Download, Users } from 'lucide-react';
 import { FilterBar } from '../components/employees/FilterBar';
 import { EmployeeTable } from '../components/employees/EmployeeTable';
 import { EmployeeCard } from '../components/employees/EmployeeCard';
@@ -38,15 +38,23 @@ export const EmployeesPage = ({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight m-0">
-            Employee Directory
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Search, filter, and maintain organizational personnel records.
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center border border-violet-500/30">
+              <Users className="w-4 h-4" />
+            </div>
+            <h2
+              className="text-2xl sm:text-3xl font-black text-white tracking-tight m-0"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              Employee Directory
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Search, filter, and maintain organizational personnel records with live database synchronization.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
           <Button
             variant="secondary"
             size="sm"
@@ -74,7 +82,7 @@ export const EmployeesPage = ({
             size="sm"
             icon={UserPlus}
             onClick={onOpenAddModal}
-            className="flex-1 sm:flex-none"
+            className="flex-1 sm:flex-none shadow-lg shadow-violet-500/20"
           >
             Add Employee
           </Button>
@@ -97,12 +105,12 @@ export const EmployeesPage = ({
 
       {/* Error Alert View */}
       {error && !isLoading && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-4 animate-slide-down">
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start justify-between gap-4 animate-slide-down">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-sm font-semibold text-rose-900">Failed to load employees</h4>
-              <p className="text-xs text-rose-700 mt-0.5">{error}</p>
+              <h4 className="text-sm font-semibold text-rose-200">Failed to load employees</h4>
+              <p className="text-xs text-rose-300/80 mt-0.5">{error}</p>
             </div>
           </div>
           <Button variant="secondary" size="sm" onClick={onRefresh}>
@@ -113,9 +121,7 @@ export const EmployeesPage = ({
 
       {/* Content Display: Loading / Empty / Data Table */}
       {isLoading ? (
-        <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-          <TableSkeleton rows={pagination.limit || 5} />
-        </div>
+        <TableSkeleton rows={pagination.limit || 5} />
       ) : employees.length === 0 ? (
         <EmptyState
           isSearch={isFiltered}

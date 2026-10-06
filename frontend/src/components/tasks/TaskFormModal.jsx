@@ -32,7 +32,6 @@ export const TaskFormModal = ({
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Populate form when editing
   useEffect(() => {
     if (taskToEdit) {
       setFormData({
@@ -74,7 +73,6 @@ export const TaskFormModal = ({
       errs.description = `Description cannot exceed ${MAX_DESC_LEN} characters.`;
     }
 
-    // Due date must not be in the past for new tasks
     if (!isEditing && data.dueDate) {
       if (data.dueDate < getTodayStr()) {
         errs.dueDate = 'Due date cannot be in the past.';
@@ -89,7 +87,6 @@ export const TaskFormModal = ({
     const next = { ...formData, [name]: value };
     setFormData(next);
 
-    // Re-validate the field that changed (only if it was already touched)
     if (touched[name]) {
       const newErrs = validate(next);
       setErrors((prev) => ({
@@ -108,7 +105,6 @@ export const TaskFormModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mark all fields as touched
     setTouched({ title: true, assignedTo: true, description: true, dueDate: true });
 
     const newErrors = validate(formData);
@@ -119,7 +115,6 @@ export const TaskFormModal = ({
 
     try {
       await onSubmit(formData);
-      // onClose() is called by the parent after successful submit
     } catch (err) {
       setErrors((prev) => ({
         ...prev,
@@ -148,11 +143,12 @@ export const TaskFormModal = ({
       }
       maxWidth="max-w-lg"
       showClose={!isLoading}
+      accentColor="from-pink-500 via-purple-500 to-cyan-500"
     >
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         {/* Form-level error */}
         {errors.form && (
-          <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium animate-slide-down">
+          <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold animate-slide-down">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errors.form}</span>
           </div>
@@ -160,7 +156,7 @@ export const TaskFormModal = ({
 
         {/* No employees warning */}
         {employees.length === 0 && (
-          <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
+          <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
             <span>No employees found. Please add employees first before creating tasks.</span>
           </div>
@@ -187,9 +183,9 @@ export const TaskFormModal = ({
               className={`text-[10px] font-medium ${
                 titleLen > MAX_TITLE_LEN * 0.9
                   ? titleLen >= MAX_TITLE_LEN
-                    ? 'text-rose-500'
-                    : 'text-amber-500'
-                  : 'text-slate-400'
+                    ? 'text-rose-400'
+                    : 'text-amber-400'
+                  : 'text-slate-500'
               }`}
             >
               {titleLen} / {MAX_TITLE_LEN}
@@ -258,10 +254,10 @@ export const TaskFormModal = ({
         </div>
 
         {/* Description */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-slate-700 tracking-wide">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-slate-400 tracking-wider uppercase">
             Description & Notes{' '}
-            <span className="font-normal text-slate-400">(Optional)</span>
+            <span className="font-normal text-slate-500">(Optional)</span>
           </label>
           <textarea
             name="description"
@@ -271,16 +267,14 @@ export const TaskFormModal = ({
             onBlur={handleBlur}
             placeholder="Describe the task objectives, deliverables, or acceptance criteria..."
             maxLength={MAX_DESC_LEN}
-            className={`w-full rounded-xl border p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-colors resize-none ${
-              errors.description
-                ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-500'
-                : 'border-slate-300 focus:ring-indigo-100 focus:border-indigo-500'
+            className={`w-full rounded-2xl p-3.5 text-sm text-white placeholder:text-slate-500 bg-white/5 border border-white/10 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all resize-none ${
+              errors.description ? 'border-rose-500/50' : ''
             }`}
             disabled={isLoading}
           />
           <div className="flex items-center justify-between">
             {errors.description ? (
-              <span className="text-xs text-rose-600 flex items-center gap-1">
+              <span className="text-xs text-rose-400 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
                 {errors.description}
               </span>
@@ -291,9 +285,9 @@ export const TaskFormModal = ({
               className={`text-[10px] font-medium ml-auto ${
                 descLen > MAX_DESC_LEN * 0.9
                   ? descLen >= MAX_DESC_LEN
-                    ? 'text-rose-500'
-                    : 'text-amber-500'
-                  : 'text-slate-400'
+                    ? 'text-rose-400'
+                    : 'text-amber-400'
+                  : 'text-slate-500'
               }`}
             >
               {descLen} / {MAX_DESC_LEN}
@@ -302,7 +296,7 @@ export const TaskFormModal = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-2">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 mt-2">
           <Button
             type="button"
             variant="secondary"
@@ -316,6 +310,7 @@ export const TaskFormModal = ({
             variant="primary"
             isLoading={isLoading}
             disabled={isLoading || employees.length === 0}
+            className="shadow-lg shadow-violet-500/30"
           >
             {isEditing ? 'Save Changes' : 'Create Task'}
           </Button>

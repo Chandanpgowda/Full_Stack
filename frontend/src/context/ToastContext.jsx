@@ -27,36 +27,36 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {/* Floating Toast Container */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none px-4 sm:px-0">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-md w-full pointer-events-none px-4 sm:px-0">
         {toasts.map((toast) => {
-          let bgClass = 'bg-white border-slate-200 text-slate-800';
-          let icon = <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />;
+          let bgClass = 'glass-dark border-white/10 text-white';
+          let icon = <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />;
 
           if (toast.type === 'success') {
-            bgClass = 'bg-emerald-50/95 border-emerald-300 text-emerald-950';
-            icon = <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />;
+            bgClass = 'glass-dark border-emerald-500/30 text-white glow-emerald shadow-emerald-500/20';
+            icon = <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />;
           } else if (toast.type === 'error') {
-            bgClass = 'bg-rose-50/95 border-rose-300 text-rose-950';
-            icon = <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />;
+            bgClass = 'glass-dark border-rose-500/30 text-white glow-pink shadow-rose-500/20';
+            icon = <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />;
           } else if (toast.type === 'warning') {
-            bgClass = 'bg-amber-50/95 border-amber-300 text-amber-950';
-            icon = <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />;
+            bgClass = 'glass-dark border-amber-500/30 text-white shadow-amber-500/20';
+            icon = <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />;
           } else if (toast.type === 'info') {
-            bgClass = 'bg-blue-50/95 border-blue-300 text-blue-950';
-            icon = <Info className="w-5 h-5 text-blue-600 shrink-0" />;
+            bgClass = 'glass-dark border-cyan-500/30 text-white glow-cyan shadow-cyan-500/20';
+            icon = <Info className="w-5 h-5 text-cyan-400 shrink-0" />;
           }
 
           return (
             <div
               key={toast.id}
-              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl border shadow-lg shadow-slate-900/10 backdrop-blur-md transition-all duration-200 animate-slide-down ${bgClass}`}
+              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-200 animate-slide-up ${bgClass}`}
             >
               <div className="mt-0.5">{icon}</div>
-              <p className="text-sm font-medium flex-1 leading-snug break-words">{toast.message}</p>
+              <p className="text-sm font-semibold flex-1 leading-snug break-words">{toast.message}</p>
               <button
                 type="button"
                 onClick={() => removeToast(toast.id)}
-                className="text-slate-400 hover:text-slate-700 transition-colors p-0.5 -mr-1 -mt-1 rounded-md"
+                className="text-slate-400 hover:text-white transition-colors p-1 -mr-1 -mt-1 rounded-lg hover:bg-white/10"
                 aria-label="Dismiss notification"
               >
                 <X className="w-4 h-4" />

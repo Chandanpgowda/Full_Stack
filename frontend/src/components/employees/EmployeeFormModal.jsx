@@ -26,7 +26,6 @@ export const EmployeeFormModal = ({
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
 
-  // Sync form data when editing or opening modal
   useEffect(() => {
     if (employeeToEdit) {
       setFormData({
@@ -46,7 +45,6 @@ export const EmployeeFormModal = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear individual field error on change
     if (errors[name]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -61,7 +59,6 @@ export const EmployeeFormModal = ({
     e.preventDefault();
     setServerError('');
 
-    // Perform client-side validation
     const validation = validateEmployeeForm(formData);
     if (!validation.isValid) {
       setErrors(validation.errors);
@@ -72,7 +69,6 @@ export const EmployeeFormModal = ({
       await onSubmit(formData);
       onClose();
     } catch (err) {
-      // Check if duplicate email conflict (409)
       if (err.statusCode === 409 || err.message?.toLowerCase().includes('already exists') || err.message?.toLowerCase().includes('in use')) {
         setErrors((prev) => ({
           ...prev,
@@ -96,11 +92,11 @@ export const EmployeeFormModal = ({
       }
       maxWidth="max-w-lg"
       showClose={!isLoading}
+      accentColor="from-violet-600 via-pink-600 to-cyan-500"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Global Server Error Banner */}
         {serverError && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium animate-slide-down">
+          <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold animate-slide-down">
             {serverError}
           </div>
         )}
@@ -160,7 +156,7 @@ export const EmployeeFormModal = ({
         />
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-2">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 mt-2">
           <Button
             type="button"
             variant="secondary"
@@ -174,6 +170,7 @@ export const EmployeeFormModal = ({
             type="submit"
             variant="primary"
             isLoading={isLoading}
+            className="shadow-lg shadow-violet-500/30"
           >
             {isEditing ? 'Save Changes' : 'Create Employee'}
           </Button>

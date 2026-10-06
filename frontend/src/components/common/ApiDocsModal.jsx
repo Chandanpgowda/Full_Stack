@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal } from './Modal';
-import { Badge } from './Badge';
-import { Code2, Server, ExternalLink } from 'lucide-react';
+import { Code2, Server } from 'lucide-react';
 
 const ENDPOINTS = [
   {
@@ -80,32 +79,33 @@ export const ApiDocsModal = ({ isOpen, onClose }) => {
       title="REST API Documentation"
       description="Overview of backend endpoints, request payloads, and status codes."
       maxWidth="max-w-2xl"
+      accentColor="from-cyan-500 via-blue-500 to-violet-500"
     >
-      <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs">
+      <div className="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1 text-xs modal-scroll">
         {ENDPOINTS.map((ep, idx) => {
-          let methodBg = 'bg-blue-50 text-blue-700 border-blue-200';
-          if (ep.method === 'POST') methodBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-          if (ep.method === 'PUT') methodBg = 'bg-amber-50 text-amber-700 border-amber-200';
-          if (ep.method === 'DELETE') methodBg = 'bg-rose-50 text-rose-700 border-rose-200';
+          let methodBg = 'bg-blue-500/15 text-blue-300 border-blue-500/30';
+          if (ep.method === 'POST') methodBg = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+          if (ep.method === 'PUT') methodBg = 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+          if (ep.method === 'DELETE') methodBg = 'bg-rose-500/15 text-rose-300 border-rose-500/30';
 
           return (
             <div
               key={idx}
-              className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 flex flex-col gap-2"
+              className="p-4 rounded-2xl glass border border-white/5 flex flex-col gap-2.5 hover:border-white/10 transition-colors"
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2 font-mono font-semibold">
-                  <span className={`px-2 py-0.5 rounded-md border text-[11px] ${methodBg}`}>
+                <div className="flex items-center gap-2 font-mono font-bold">
+                  <span className={`px-2.5 py-0.5 rounded-lg border text-[11px] ${methodBg}`}>
                     {ep.method}
                   </span>
-                  <span className="text-slate-900 text-xs">{ep.path}</span>
+                  <span className="text-white text-xs">{ep.path}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {ep.codes.map((code, cIdx) => (
                     <span
                       key={cIdx}
-                      className="px-2 py-0.5 rounded text-[10px] font-mono bg-white border border-slate-200 text-slate-600"
+                      className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-white/5 border border-white/5 text-slate-400"
                     >
                       {code}
                     </span>
@@ -113,17 +113,17 @@ export const ApiDocsModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              <p className="text-slate-600 text-xs leading-relaxed">{ep.description}</p>
+              <p className="text-slate-300 text-xs leading-relaxed">{ep.description}</p>
 
               {ep.params && (
-                <div className="bg-white p-2 rounded-lg border border-slate-200/70 font-mono text-[11px] text-slate-600 truncate">
-                  <strong className="text-slate-400">Query: </strong> {ep.params}
+                <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 font-mono text-[11px] text-slate-300 truncate">
+                  <strong className="text-violet-400">Query: </strong> {ep.params}
                 </div>
               )}
 
               {ep.body && (
-                <div className="bg-white p-2 rounded-lg border border-slate-200/70 font-mono text-[11px] text-slate-600 truncate">
-                  <strong className="text-slate-400">Body: </strong> {ep.body}
+                <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 font-mono text-[11px] text-slate-300 truncate">
+                  <strong className="text-pink-400">Body: </strong> {ep.body}
                 </div>
               )}
             </div>

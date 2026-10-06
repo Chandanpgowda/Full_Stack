@@ -1,8 +1,52 @@
 import React from 'react';
 import { Users, Building2, TrendingUp, Sparkles } from 'lucide-react';
 
+const STAT_CONFIG = [
+  {
+    title: 'Total Workforce',
+    icon: Users,
+    gradient: 'from-violet-600 to-purple-600',
+    glow: 'glow-purple',
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/20',
+    textColor: 'text-violet-300',
+    iconBg: 'bg-violet-500/20',
+  },
+  {
+    title: 'Active Departments',
+    icon: Building2,
+    gradient: 'from-pink-600 to-rose-600',
+    glow: 'glow-pink',
+    bg: 'bg-pink-500/10',
+    border: 'border-pink-500/20',
+    textColor: 'text-pink-300',
+    iconBg: 'bg-pink-500/20',
+  },
+  {
+    title: 'Largest Department',
+    icon: TrendingUp,
+    gradient: 'from-cyan-600 to-blue-600',
+    glow: 'glow-cyan',
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-500/20',
+    textColor: 'text-cyan-300',
+    iconBg: 'bg-cyan-500/20',
+    isText: true,
+  },
+  {
+    title: 'Latest Onboarding',
+    icon: Sparkles,
+    gradient: 'from-amber-500 to-orange-600',
+    glow: 'glow-emerald',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    textColor: 'text-amber-300',
+    iconBg: 'bg-amber-500/20',
+    isText: true,
+  },
+];
+
 export const StatsGrid = ({ employees = [], totalCount = 0 }) => {
-  // Compute department metrics
   const departmentCounts = employees.reduce((acc, emp) => {
     const dept = emp.department || 'Unassigned';
     acc[dept] = (acc[dept] || 0) + 1;
@@ -11,89 +55,60 @@ export const StatsGrid = ({ employees = [], totalCount = 0 }) => {
 
   const activeDepartmentCount = Object.keys(departmentCounts).length;
 
-  // Find top department
   let topDepartment = 'None';
   let maxCount = 0;
   Object.entries(departmentCounts).forEach(([dept, count]) => {
-    if (count > maxCount) {
-      maxCount = count;
-      topDepartment = dept;
-    }
+    if (count > maxCount) { maxCount = count; topDepartment = dept; }
   });
 
-  // Most recently added employee
   const latestEmployee = employees[0]?.name || 'No records';
 
   const stats = [
-    {
-      title: 'Total Workforce',
-      value: totalCount,
-      subtitle: `${totalCount === 1 ? '1 active profile' : `${totalCount} active profiles`}`,
-      icon: Users,
-      color: 'from-blue-600 to-indigo-600',
-      iconBg: 'bg-indigo-50 text-indigo-600'
-    },
-    {
-      title: 'Active Departments',
-      value: activeDepartmentCount,
-      subtitle: `${activeDepartmentCount} operational units`,
-      icon: Building2,
-      color: 'from-purple-600 to-pink-600',
-      iconBg: 'bg-purple-50 text-purple-600'
-    },
-    {
-      title: 'Largest Department',
-      value: topDepartment,
-      subtitle: maxCount > 0 ? `${maxCount} team members` : 'No data yet',
-      icon: TrendingUp,
-      color: 'from-emerald-600 to-teal-600',
-      iconBg: 'bg-emerald-50 text-emerald-600',
-      isText: true
-    },
-    {
-      title: 'Latest Onboarding',
-      value: latestEmployee,
-      subtitle: employees[0]?.designation || 'Ready to add',
-      icon: Sparkles,
-      color: 'from-amber-600 to-orange-600',
-      iconBg: 'bg-amber-50 text-amber-600',
-      isText: true
-    }
+    { ...STAT_CONFIG[0], value: totalCount, subtitle: `${totalCount} active profiles` },
+    { ...STAT_CONFIG[1], value: activeDepartmentCount, subtitle: `${activeDepartmentCount} operational units` },
+    { ...STAT_CONFIG[2], value: topDepartment, subtitle: maxCount > 0 ? `${maxCount} members` : 'No data yet' },
+    { ...STAT_CONFIG[3], value: latestEmployee, subtitle: employees[0]?.designation || 'Add first employee' },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, idx) => {
         const Icon = stat.icon;
         return (
           <div
             key={idx}
-            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"
+            className={`glass-card p-5 border ${stat.border} relative overflow-hidden group stagger-${idx + 1} animate-slide-up`}
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            {/* Background gradient glow */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-8 transition-opacity duration-500 rounded-[20px]`} />
+
+            {/* Top row */}
+            <div className="flex items-start justify-between relative z-10">
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${stat.textColor} mb-2`}>
                   {stat.title}
                 </p>
                 <h3
-                  className={`mt-2 font-bold text-slate-900 tracking-tight ${
-                    stat.isText ? 'text-lg sm:text-xl truncate max-w-[180px]' : 'text-3xl'
+                  className={`font-black text-white tracking-tight ${
+                    stat.isText ? 'text-lg truncate max-w-[150px]' : 'text-3xl animate-count'
                   }`}
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
                   title={typeof stat.value === 'string' ? stat.value : undefined}
                 >
                   {stat.value}
                 </h3>
               </div>
 
-              <div className={`p-3 rounded-xl ${stat.iconBg}`}>
-                <Icon className="w-5 h-5" />
+              <div className={`w-11 h-11 rounded-2xl ${stat.iconBg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                <Icon className={`w-5 h-5 ${stat.textColor}`} />
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 mt-4 truncate pt-3 border-t border-slate-100 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {stat.subtitle}
-            </p>
+            {/* Bottom subtitle */}
+            <div className={`mt-4 pt-3 border-t border-white/5 flex items-center gap-1.5`}>
+              <span className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${stat.gradient} animate-pulse`} />
+              <p className="text-[11px] text-slate-500 truncate">{stat.subtitle}</p>
+            </div>
           </div>
         );
       })}
