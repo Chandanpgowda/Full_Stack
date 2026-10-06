@@ -35,7 +35,11 @@ const errorHandler = (err, req, res, next) => {
     statusCode = 409;
     const field = Object.keys(err.keyValue || {})[0] || 'field';
     const value = err.keyValue ? err.keyValue[field] : '';
-    message = `An employee with ${field} '${value}' already exists`;
+    if (field === 'email') {
+      message = `An account with email '${value}' already exists. Please sign in instead.`;
+    } else {
+      message = `A record with ${field} '${value}' already exists`;
+    }
   }
 
   // Handle SyntaxError for bad JSON payload

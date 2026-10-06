@@ -9,6 +9,18 @@ const apiClient = axios.create({
   }
 });
 
+// Request interceptor to automatically add Authorization token header
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('ems_token');
+    if (token && token !== 'null' && token !== 'undefined') {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor to format errors uniformly
 apiClient.interceptors.response.use(
   (response) => response,

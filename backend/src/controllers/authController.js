@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ems_secure_jwt_secret_key_2026';
+const getJwtSecret = () => process.env.JWT_SECRET || 'ems_secure_jwt_secret_key_2026';
 const JWT_EXPIRES_IN = '7d';
 
 /**
@@ -14,7 +14,7 @@ const generateToken = (user) => {
       email: user.email,
       role: user.role
     },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: JWT_EXPIRES_IN }
   );
 };
@@ -68,7 +68,7 @@ exports.register = async (req, res, next) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -77,8 +77,8 @@ exports.register = async (req, res, next) => {
     }
 
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
       password,
       provider: 'local'
     });
@@ -119,7 +119,7 @@ exports.login = async (req, res, next) => {
     }
 
     // Find user and include password hash
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -191,7 +191,7 @@ exports.googleAuth = async (req, res, next) => {
     if (!userEmail) {
       return res.status(400).json({
         success: false,
-        message: 'Google authentication payload missing email'
+        message: 'Google authentication payload missing valid email'
       });
     }
 
@@ -255,7 +255,14 @@ exports.getMe = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!token || token === 'null' || token === 'undefined') {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized, invalid token provided'
+      });
+    }
+
+    const decoded = jwt.verify(token, getJwtSecret());
 
     const user = await User.findById(decoded.id);
     if (!user) {
@@ -283,3 +290,4 @@ exports.getMe = async (req, res, next) => {
     });
   }
 };
+

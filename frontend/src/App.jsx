@@ -14,6 +14,7 @@ import { AiAssistantModal } from './components/ai/AiAssistantModal';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { employeeService } from './services/employeeService';
 import { taskService } from './services/taskService';
+import { authService } from './services/authService';
 import { useDebounce } from './hooks/useDebounce';
 import { exportEmployeesToCSV } from './utils/exportToCsv';
 import Dock from './components/effects/Dock';
@@ -597,10 +598,31 @@ export default function App() {
     }
   });
 
+  // Validate active token on app mount
+  useEffect(() => {
+    const token = localStorage.getItem('ems_token');
+    if (!token) return;
+
+    authService.getMe()
+      .then(res => {
+        if (res?.user) {
+          setAuthUser(res.user);
+          localStorage.setItem('ems_user', JSON.stringify(res.user));
+        }
+      })
+      .catch(() => {
+        // Token invalid or expired — clear stored auth data
+        localStorage.removeItem('ems_token');
+        localStorage.removeItem('ems_user');
+        setAuthUser(null);
+      });
+  }, []);
+
   const handleAuthenticated = (user) => setAuthUser(user);
 
   const handleSignOut = () => {
     localStorage.removeItem('ems_user');
+    localStorage.removeItem('ems_token');
     setAuthUser(null);
   };
 
