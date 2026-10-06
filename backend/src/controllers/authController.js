@@ -172,8 +172,8 @@ exports.googleAuth = async (req, res, next) => {
   try {
     const { credential, email, name, avatar, googleId } = req.body;
 
-    let userEmail = email;
-    let userName = name;
+    let userEmail = email || '';
+    let userName = name || '';
     let userAvatar = avatar || '';
     let gId = googleId || '';
 
@@ -181,10 +181,10 @@ exports.googleAuth = async (req, res, next) => {
     if (credential) {
       const decoded = decodeGoogleCredential(credential);
       if (decoded && decoded.email) {
-        userEmail = decoded.email;
-        userName = decoded.name || decoded.email.split('@')[0];
-        userAvatar = decoded.picture || '';
-        gId = decoded.sub || '';
+        userEmail = userEmail || decoded.email;
+        userName = userName || decoded.name || decoded.email.split('@')[0];
+        userAvatar = userAvatar || decoded.picture || '';
+        gId = gId || decoded.sub || '';
       }
     }
 
@@ -195,7 +195,8 @@ exports.googleAuth = async (req, res, next) => {
       });
     }
 
-    userEmail = userEmail.toLowerCase();
+    userEmail = userEmail.toLowerCase().trim();
+    userName = (userName || userEmail.split('@')[0]).trim().slice(0, 80);
 
     // Check if user exists
     let user = await User.findOne({ email: userEmail });
@@ -203,7 +204,7 @@ exports.googleAuth = async (req, res, next) => {
     if (!user) {
       // Create new user via Google
       user = await User.create({
-        name: userName || userEmail.split('@')[0],
+        name: userName,
         email: userEmail,
         avatar: userAvatar,
         provider: 'google',
@@ -211,9 +212,12 @@ exports.googleAuth = async (req, res, next) => {
       });
     } else {
       // Update googleId and avatar if missing
-      if (userAvatar && !user.avatar) user.avatar = userAvatar;
-      if (gId && !user.googleId) user.googleId = gId;
-      await user.save();
+      let modified = false;
+      if (userAvatar && !user.avatar) { user.avatar = userAvatar; modified = true; }
+      if (gId && !user.googleId) { user.googleId = gId; modified = true; }
+      if (modified) {
+        await user.save();
+      }
     }
 
     const token = generateToken(user);

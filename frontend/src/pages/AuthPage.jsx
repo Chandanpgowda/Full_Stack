@@ -87,13 +87,44 @@ export const AuthPage = ({ onAuthenticated }) => {
     try {
       setIsLoading(true);
       setServerError('');
-      const data = await authService.googleAuth({ credential: response.credential });
+
+      if (!response || !response.credential) {
+        throw new Error('Google authentication returned no credential. Please try again.');
+      }
+
+      const payload = { credential: response.credential };
+
+      // Helper to safely parse Google JWT on frontend as robust fallback
+      try {
+        const parts = response.credential.split('.');
+        if (parts.length === 3) {
+          const base64Url = parts[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const decoded = JSON.parse(jsonPayload);
+          if (decoded && decoded.email) {
+            payload.email = decoded.email;
+            payload.name = decoded.name;
+            payload.avatar = decoded.picture;
+            payload.googleId = decoded.sub;
+          }
+        }
+      } catch (e) {
+        console.warn('Client-side Google credential decode warning:', e);
+      }
+
+      const data = await authService.googleAuth(payload);
       localStorage.setItem('ems_token', data.token);
       localStorage.setItem('ems_user', JSON.stringify(data.user));
       showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
       onAuthenticated(data.user);
     } catch (err) {
-      const msg = err.message || 'Google authentication failed. Try again.';
+      const msg = err.response?.data?.message || err.message || 'Google authentication failed. Try again.';
       setServerError(msg);
       showToast(msg, 'error');
     } finally {
