@@ -11,13 +11,14 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false # Set in Render Dashboard with your MongoDB Atlas URI
+        sync: false # Paste your MongoDB Atlas URI in Render dashboard
       - key: CLIENT_ORIGIN
-        value: "*" # Or your frontend onrender.com URL once created
+        value: "*"
 
   # ── Frontend Static Site (Vite React) ──────────────────
-  - type: static
+  - type: web
     name: ems-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
@@ -27,4 +28,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false # Set in Render Dashboard: https://ems-backend.onrender.com/api
+        sync: false # Set in Render dashboard: https://ems-backend.onrender.com/api
