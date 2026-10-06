@@ -14,6 +14,17 @@ import { employeeService } from './services/employeeService';
 import { taskService } from './services/taskService';
 import { useDebounce } from './hooks/useDebounce';
 import { exportEmployeesToCSV } from './utils/exportToCsv';
+import SplashCursor from './components/effects/SplashCursor';
+import Dock from './components/effects/Dock';
+import GradientWaves from './components/effects/GradientWaves';
+import {
+  LayoutDashboard,
+  Users2,
+  CheckSquare,
+  UserPlus,
+  Plus,
+  Code2
+} from 'lucide-react';
 
 const MainApp = () => {
   const { showToast } = useToast();
@@ -295,12 +306,92 @@ const MainApp = () => {
     }
   };
 
+  // Dock navigation items (used for the floating bottom dock)
+  const dockItems = [
+    {
+      icon: <LayoutDashboard size={20} />,
+      label: 'Dashboard',
+      onClick: () => setActiveTab('dashboard'),
+      className: activeTab === 'dashboard' ? 'dock-item-active' : ''
+    },
+    {
+      icon: <Users2 size={20} />,
+      label: 'Directory',
+      onClick: () => setActiveTab('employees'),
+      className: activeTab === 'employees' ? 'dock-item-active' : ''
+    },
+    {
+      icon: <CheckSquare size={20} />,
+      label: 'Tasks',
+      onClick: () => setActiveTab('tasks'),
+      className: activeTab === 'tasks' ? 'dock-item-active' : ''
+    },
+    {
+      icon: <UserPlus size={20} />,
+      label: 'Add Employee',
+      onClick: handleOpenAddModal
+    },
+    {
+      icon: <Plus size={20} />,
+      label: 'Add Task',
+      onClick: handleOpenAddTask
+    },
+    {
+      icon: <Code2 size={20} />,
+      label: 'API Docs',
+      onClick: () => setIsDocsOpen(true)
+    }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-[#0a0a1a] text-slate-100 selection:bg-violet-600 selection:text-white relative overflow-x-hidden">
-      {/* Ambient background glowing orbs */}
-      <div className="bg-orb w-96 h-96 bg-violet-600/15 -top-20 -left-20 animate-float" />
-      <div className="bg-orb w-[30rem] h-[30rem] bg-pink-600/10 top-1/3 -right-32 animate-float" style={{ animationDelay: '2s' }} />
-      <div className="bg-orb w-80 h-80 bg-cyan-600/10 bottom-10 left-1/4 animate-float" style={{ animationDelay: '4s' }} />
+      {/* ── WebGL Wave Background ── */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0,
+        pointerEvents: 'none', opacity: 0.18
+      }}>
+        <GradientWaves
+          horizonColor="#3b0764"
+          waveColor="#7c3aed"
+          crestColor="#c084fc"
+          speed={0.25}
+          amplitude={2.0}
+          waveScale={0.5}
+          waveRatio={0.85}
+          swell={25}
+          turbulence={15}
+          tilt={1.18}
+          zoom={1.0}
+          height={5.0}
+          fogDepth={12}
+          detail="medium"
+          brightness={1.2}
+          opacity={1.0}
+          mouseInteraction={true}
+          parallaxStrength={0.3}
+          grain={true}
+          grainIntensity={0.04}
+        />
+      </div>
+
+      {/* ── Fluid Cursor Effect ── */}
+      <SplashCursor
+        SIM_RESOLUTION={128}
+        DYE_RESOLUTION={1024}
+        DENSITY_DISSIPATION={4}
+        VELOCITY_DISSIPATION={2.5}
+        SPLAT_RADIUS={0.18}
+        SPLAT_FORCE={5000}
+        CURL={3}
+        RAINBOW_MODE={true}
+        SHADING={true}
+        TRANSPARENT={true}
+      />
+
+      {/* Ambient orbs (still layered on top of waves) */}
+      <div className="bg-orb w-96 h-96 bg-violet-600/10 -top-20 -left-20 animate-float" style={{ zIndex: 1 }} />
+      <div className="bg-orb w-[30rem] h-[30rem] bg-pink-600/8 top-1/3 -right-32 animate-float" style={{ animationDelay: '2s', zIndex: 1 }} />
+      <div className="bg-orb w-80 h-80 bg-cyan-600/8 bottom-10 left-1/4 animate-float" style={{ animationDelay: '4s', zIndex: 1 }} />
 
       {/* Top Navigation */}
       <Navbar
@@ -315,7 +406,7 @@ const MainApp = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-36 relative z-10">
         {activeTab === 'dashboard' ? (
           <DashboardPage
             employees={allEmployees.length > 0 ? allEmployees : employees}
@@ -373,6 +464,20 @@ const MainApp = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* ── Floating Dock ── */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 998, pointerEvents: 'none' }}>
+        <div style={{ pointerEvents: 'auto', display: 'flex', justifyContent: 'center' }}>
+          <Dock
+            items={dockItems}
+            panelHeight={62}
+            baseItemSize={46}
+            magnification={66}
+            distance={180}
+            dockHeight={240}
+          />
+        </div>
+      </div>
 
       {/* Create / Edit Employee Modal */}
       <EmployeeFormModal
