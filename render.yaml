@@ -1,17 +1,32 @@
 services:
-  # Backend API Web Service
+  # ── Backend Web Service (Node.js + Express) ────────────
   - type: web
-    name: employee-management-api
-    env: node
+    name: ems-backend
+    runtime: node
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
       - key: MONGODB_URI
-        sync: false
+        sync: false # Set in Render Dashboard with your MongoDB Atlas URI
       - key: CLIENT_ORIGIN
-        sync: false
+        value: "*" # Or your frontend onrender.com URL once created
+
+  # ── Frontend Static Site (Vite React) ──────────────────
+  - type: web
+    name: ems-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false # Set in Render Dashboard: https://ems-backend.onrender.com/api
