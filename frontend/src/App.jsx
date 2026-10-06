@@ -4,6 +4,7 @@ import { Footer } from './components/layout/Footer';
 import { DashboardPage } from './pages/DashboardPage';
 import { EmployeesPage } from './pages/EmployeesPage';
 import { TasksPage } from './pages/TasksPage';
+import { AuthPage } from './pages/AuthPage';
 import { EmployeeFormModal } from './components/employees/EmployeeFormModal';
 import { EmployeeDetailModal } from './components/employees/EmployeeDetailModal';
 import { TaskFormModal } from './components/tasks/TaskFormModal';
@@ -23,10 +24,11 @@ import {
   CheckSquare,
   UserPlus,
   Plus,
-  Code2
+  Code2,
+  LogOut
 } from 'lucide-react';
 
-const MainApp = () => {
+const MainApp = ({ authUser, onSignOut }) => {
   const { showToast } = useToast();
 
   // Navigation state: 'dashboard' | 'employees' | 'tasks'
@@ -340,6 +342,11 @@ const MainApp = () => {
       icon: <Code2 size={20} />,
       label: 'API Docs',
       onClick: () => setIsDocsOpen(true)
+    },
+    {
+      icon: <LogOut size={20} />,
+      label: 'Sign Out',
+      onClick: onSignOut
     }
   ];
 
@@ -403,6 +410,8 @@ const MainApp = () => {
         serverStatus={serverStatus}
         totalCount={allEmployees.length || pagination.total}
         taskCount={tasks.length}
+        authUser={authUser}
+        onSignOut={onSignOut}
       />
 
       {/* Main Content Area */}
@@ -569,9 +578,34 @@ const MainApp = () => {
 };
 
 export default function App() {
+  // ── Auth gate ──────────────────────────────────────────────
+  const [authUser, setAuthUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('ems_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleAuthenticated = (user) => setAuthUser(user);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('ems_user');
+    setAuthUser(null);
+  };
+
+  if (!authUser) {
+    return (
+      <ToastProvider>
+        <AuthPage onAuthenticated={handleAuthenticated} />
+      </ToastProvider>
+    );
+  }
+
   return (
     <ToastProvider>
-      <MainApp />
+      <MainApp authUser={authUser} onSignOut={handleSignOut} />
     </ToastProvider>
   );
 }

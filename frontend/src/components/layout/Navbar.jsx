@@ -9,7 +9,9 @@ import {
   Plus,
   Zap,
   Activity,
-  Code2
+  Code2,
+  LogOut,
+  User
 } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -21,7 +23,9 @@ export const Navbar = ({
   onOpenDocs,
   serverStatus,
   totalCount = 0,
-  taskCount = 0
+  taskCount = 0,
+  authUser,
+  onSignOut
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -135,6 +139,32 @@ export const Navbar = ({
             >
               <span className="hidden sm:block">Employee</span>
             </Button>
+
+            {/* User Profile & Sign Out */}
+            {authUser && (
+              <div className="flex items-center gap-2 pl-2 border-l border-white/10">
+                <div
+                  className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/5 border border-white/8 text-xs text-slate-300"
+                  title={authUser.email}
+                >
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-violet-600 to-pink-500 flex items-center justify-center text-white font-bold text-[11px] shadow-sm">
+                    {authUser.name ? authUser.name.charAt(0).toUpperCase() : <User className="w-3 h-3" />}
+                  </div>
+                  <span className="hidden xl:inline max-w-[100px] truncate font-medium">
+                    {authUser.name || authUser.email}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  title="Sign out"
+                  className="p-1.5 rounded-xl bg-white/5 border border-white/8 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
