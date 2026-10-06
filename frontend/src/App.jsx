@@ -15,7 +15,6 @@ import { employeeService } from './services/employeeService';
 import { taskService } from './services/taskService';
 import { useDebounce } from './hooks/useDebounce';
 import { exportEmployeesToCSV } from './utils/exportToCsv';
-import SplashCursor from './components/effects/SplashCursor';
 import Dock from './components/effects/Dock';
 import GradientWaves from './components/effects/GradientWaves';
 import {
@@ -381,19 +380,6 @@ const MainApp = ({ authUser, onSignOut }) => {
         />
       </div>
 
-      {/* ── Fluid Cursor Effect ── */}
-      <SplashCursor
-        SIM_RESOLUTION={128}
-        DYE_RESOLUTION={1024}
-        DENSITY_DISSIPATION={4}
-        VELOCITY_DISSIPATION={2.5}
-        SPLAT_RADIUS={0.18}
-        SPLAT_FORCE={5000}
-        CURL={3}
-        RAINBOW_MODE={true}
-        SHADING={true}
-        TRANSPARENT={true}
-      />
 
       {/* Ambient orbs (still layered on top of waves) */}
       <div className="bg-orb w-96 h-96 bg-violet-600/10 -top-20 -left-20 animate-float" style={{ zIndex: 1 }} />
