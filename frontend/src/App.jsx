@@ -10,6 +10,7 @@ import { EmployeeDetailModal } from './components/employees/EmployeeDetailModal'
 import { TaskFormModal } from './components/tasks/TaskFormModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
 import { ApiDocsModal } from './components/common/ApiDocsModal';
+import { AiAssistantModal } from './components/ai/AiAssistantModal';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { employeeService } from './services/employeeService';
 import { taskService } from './services/taskService';
@@ -24,7 +25,8 @@ import {
   UserPlus,
   Plus,
   Code2,
-  LogOut
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 
 const MainApp = ({ authUser, onSignOut }) => {
@@ -79,6 +81,7 @@ const MainApp = ({ authUser, onSignOut }) => {
   const [taskToDelete, setTaskToDelete] = useState(null);
 
   const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Check backend server health
   const checkHealth = useCallback(async () => {
@@ -338,6 +341,11 @@ const MainApp = ({ authUser, onSignOut }) => {
       onClick: handleOpenAddTask
     },
     {
+      icon: <Sparkles size={20} className="text-amber-300" />,
+      label: 'AI Copilot',
+      onClick: () => setIsAiModalOpen(true)
+    },
+    {
       icon: <Code2 size={20} />,
       label: 'API Docs',
       onClick: () => setIsDocsOpen(true)
@@ -393,6 +401,7 @@ const MainApp = ({ authUser, onSignOut }) => {
         onOpenAddModal={handleOpenAddModal}
         onOpenAddTaskModal={handleOpenAddTask}
         onOpenDocs={() => setIsDocsOpen(true)}
+        onOpenAiModal={() => setIsAiModalOpen(true)}
         serverStatus={serverStatus}
         totalCount={allEmployees.length || pagination.total}
         taskCount={tasks.length}
@@ -558,6 +567,20 @@ const MainApp = ({ authUser, onSignOut }) => {
       <ApiDocsModal
         isOpen={isDocsOpen}
         onClose={() => setIsDocsOpen(false)}
+      />
+
+      {/* Google Gemini AI Copilot Assistant */}
+      <AiAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        portalContext={{
+          totalEmployees: allEmployees.length || pagination.total,
+          totalTasks: tasks.length,
+          completedTasks: tasks.filter(t => t.status === 'Completed').length,
+          pendingTasks: tasks.filter(t => t.status === 'Pending').length,
+          inProgressTasks: tasks.filter(t => t.status === 'In Progress').length,
+          departments: [...new Set(allEmployees.map(e => e.department).filter(Boolean))]
+        }}
       />
     </div>
   );

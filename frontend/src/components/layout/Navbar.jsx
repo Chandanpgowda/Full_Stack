@@ -11,7 +11,8 @@ import {
   Activity,
   Code2,
   LogOut,
-  User
+  User,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -21,6 +22,7 @@ export const Navbar = ({
   onOpenAddModal,
   onOpenAddTaskModal,
   onOpenDocs,
+  onOpenAiModal,
   serverStatus,
   totalCount = 0,
   taskCount = 0,
@@ -89,6 +91,17 @@ export const Navbar = ({
 
           {/* Right Section */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* AI Copilot */}
+            <button
+              type="button"
+              onClick={onOpenAiModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 shadow-md shadow-violet-600/30 glow-purple transition-all hover:scale-105 active:scale-95"
+              title="Open Gemini AI Assistant"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+              <span>AI Copilot</span>
+            </button>
+
             {/* API Docs */}
             <button
               type="button"

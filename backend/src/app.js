@@ -5,6 +5,7 @@ const healthRoutes = require('./routes/healthRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./routes/authRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -24,6 +25,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/tasks', taskRoutes);

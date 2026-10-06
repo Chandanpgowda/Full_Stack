@@ -20,6 +20,8 @@ services:
         sync: false # Set in Render Dashboard
       - key: JWT_SECRET
         generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false # Set in Render Dashboard from https://aistudio.google.com/app/apikey
 
   # ── Frontend Static Site (Vite React) ──────────────────
   - type: web
