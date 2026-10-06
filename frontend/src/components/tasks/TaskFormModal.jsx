@@ -4,6 +4,7 @@ import { Modal } from '../common/Modal';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { Button } from '../common/Button';
+import { MiniCalendar } from './MiniCalendar';
 
 const INITIAL_FORM = {
   title: '',
@@ -31,6 +32,7 @@ export const TaskFormModal = ({
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [showCalendar, setShowCalendar] = useState(true);
 
   useEffect(() => {
     if (taskToEdit) {
@@ -237,20 +239,65 @@ export const TaskFormModal = ({
           />
         </div>
 
-        {/* Due Date */}
-        <div>
-          <Input
-            label="Due Date (Optional)"
-            name="dueDate"
-            type="date"
-            value={formData.dueDate}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={errors.dueDate}
-            icon={Calendar}
-            disabled={isLoading}
-            min={!isEditing ? getTodayStr() : undefined}
-          />
+        {/* Due Date & Calendar Picker */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-violet-400" />
+              Due Date & Calendar
+              <span className="font-normal text-slate-500 lowercase">(optional)</span>
+            </label>
+
+            <button
+              type="button"
+              onClick={() => setShowCalendar((v) => !v)}
+              className="text-xs font-semibold text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors"
+            >
+              {showCalendar ? 'Hide Calendar' : '📅 Show Calendar'}
+            </button>
+          </div>
+
+          <div className="relative flex items-center">
+            <div className="absolute left-3.5 text-violet-400 pointer-events-none flex items-center justify-center">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <input
+              type="date"
+              name="dueDate"
+              value={formData.dueDate}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isLoading}
+              min={!isEditing ? getTodayStr() : undefined}
+              className={`dark-input pl-10 cursor-pointer ${errors.dueDate ? 'error' : ''}`}
+              onClick={(e) => {
+                setShowCalendar(true);
+                e.target.showPicker?.();
+              }}
+            />
+          </div>
+
+          {errors.dueDate && (
+            <p className="text-xs font-medium text-rose-400 animate-slide-down flex items-center gap-1">
+              <span className="w-1 h-1 rounded-full bg-rose-400 shrink-0" />
+              {errors.dueDate}
+            </p>
+          )}
+
+          {/* Embedded Visual Interactive Calendar */}
+          {showCalendar && (
+            <MiniCalendar
+              value={formData.dueDate}
+              minDate={!isEditing ? getTodayStr() : undefined}
+              onChange={(dateStr) => {
+                const next = { ...formData, dueDate: dateStr };
+                setFormData(next);
+                setTouched((prev) => ({ ...prev, dueDate: true }));
+                const newErrs = validate(next);
+                setErrors((prev) => ({ ...prev, dueDate: newErrs.dueDate }));
+              }}
+            />
+          )}
         </div>
 
         {/* Description */}
