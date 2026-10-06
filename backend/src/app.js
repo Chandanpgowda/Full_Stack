@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const healthRoutes = require('./routes/healthRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -23,6 +24,7 @@ if (process.env.NODE_ENV !== 'test') {
 // API Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/employees', employeeRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Root route
 app.get('/', (req, res) => {

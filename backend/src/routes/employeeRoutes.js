@@ -7,12 +7,16 @@ const {
   updateEmployee,
   deleteEmployee
 } = require('../controllers/employeeController');
+const { getEmployeeTasks } = require('../controllers/taskController');
 
 // Routes for /api/employees
 router
   .route('/')
   .get(getEmployees)
   .post(createEmployee);
+
+// Get all tasks for an employee
+router.get('/:id/tasks', getEmployeeTasks);
 
 // Routes for /api/employees/:id
 router

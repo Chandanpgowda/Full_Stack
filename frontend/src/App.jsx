@@ -3,24 +3,27 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { DashboardPage } from './pages/DashboardPage';
 import { EmployeesPage } from './pages/EmployeesPage';
+import { TasksPage } from './pages/TasksPage';
 import { EmployeeFormModal } from './components/employees/EmployeeFormModal';
 import { EmployeeDetailModal } from './components/employees/EmployeeDetailModal';
+import { TaskFormModal } from './components/tasks/TaskFormModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
 import { ApiDocsModal } from './components/common/ApiDocsModal';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { employeeService } from './services/employeeService';
+import { taskService } from './services/taskService';
 import { useDebounce } from './hooks/useDebounce';
 import { exportEmployeesToCSV } from './utils/exportToCsv';
 
 const MainApp = () => {
   const { showToast } = useToast();
 
-  // Navigation state
+  // Navigation state: 'dashboard' | 'employees' | 'tasks'
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Employee data & pagination state
+  // Employee state
   const [employees, setEmployees] = useState([]);
-  const [allEmployees, setAllEmployees] = useState([]); // For accurate dashboard metrics
+  const [allEmployees, setAllEmployees] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -30,7 +33,11 @@ const MainApp = () => {
     hasPrevPage: false
   });
 
-  // Filter & Search states
+  // Task state
+  const [tasks, setTasks] = useState([]);
+  const [isTasksLoading, setIsTasksLoading] = useState(false);
+
+  // Filter & Search states for Employees
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 350);
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -43,7 +50,7 @@ const MainApp = () => {
   const [error, setError] = useState(null);
   const [serverStatus, setServerStatus] = useState('connecting');
 
-  // Modal Dialog states
+  // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState(null);
 
@@ -52,6 +59,12 @@ const MainApp = () => {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+
+  const [isTaskDeleteDialogOpen, setIsTaskDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   const [isDocsOpen, setIsDocsOpen] = useState(false);
 
@@ -69,7 +82,7 @@ const MainApp = () => {
     }
   }, []);
 
-  // Fetch employees list for Directory page
+  // Fetch employees list
   const fetchEmployees = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -99,7 +112,7 @@ const MainApp = () => {
     }
   }, [debouncedSearch, selectedDepartment, pagination.page, pagination.limit, sortBy, order]);
 
-  // Fetch all employees for Dashboard metrics
+  // Fetch all employees for Dashboard & Assignee dropdowns
   const fetchAllForDashboard = useCallback(async () => {
     try {
       const response = await employeeService.getEmployees({ limit: 0, sortBy: 'createdAt', order: 'desc' });
@@ -107,98 +120,93 @@ const MainApp = () => {
         setAllEmployees(response.data || []);
       }
     } catch (err) {
-      console.error('Failed to load dashboard metrics:', err);
+      console.error('Failed to load employee directory:', err);
     }
   }, []);
 
-  // Initial load and Health Check
+  // Fetch tasks
+  const fetchTasks = useCallback(async () => {
+    setIsTasksLoading(true);
+    try {
+      const response = await taskService.getTasks({ limit: 0, sortBy: 'createdAt', order: 'desc' });
+      if (response.success) {
+        setTasks(response.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to load tasks:', err);
+    } finally {
+      setIsTasksLoading(false);
+    }
+  }, []);
+
+  // Initial load
   useEffect(() => {
     checkHealth();
     fetchAllForDashboard();
-  }, [checkHealth, fetchAllForDashboard]);
+    fetchTasks();
+  }, [checkHealth, fetchAllForDashboard, fetchTasks]);
 
-  // Refetch when filters or pagination change
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
 
-  // Reset page to 1 when search or department changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, [debouncedSearch, selectedDepartment]);
 
-  // Handler: Open Add Modal
+  // Handlers for Employee Modals
   const handleOpenAddModal = () => {
     setEmployeeToEdit(null);
     setIsFormModalOpen(true);
   };
 
-  // Handler: Open Edit Modal
   const handleOpenEditModal = (employee) => {
     setEmployeeToEdit(employee);
     setIsFormModalOpen(true);
   };
 
-  // Handler: Open View Detail Modal
   const handleOpenDetailModal = (employee) => {
     setSelectedEmployee(employee);
     setIsDetailModalOpen(true);
   };
 
-  // Handler: Open Delete Confirmation Modal
   const handleOpenDeleteModal = (employee) => {
     setEmployeeToDelete(employee);
     setIsDeleteDialogOpen(true);
   };
 
-  // Handler: Submit Form (Create or Update)
   const handleFormSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
       if (employeeToEdit) {
-        // Update existing employee
         const response = await employeeService.updateEmployee(employeeToEdit._id, formData);
-        showToast(
-          response.message || `Updated details for ${formData.name}`,
-          'success'
-        );
+        showToast(response.message || `Updated details for ${formData.name}`, 'success');
       } else {
-        // Create new employee
         const response = await employeeService.createEmployee(formData);
-        showToast(
-          response.message || `Successfully created profile for ${formData.name}`,
-          'success'
-        );
+        showToast(response.message || `Successfully created profile for ${formData.name}`, 'success');
       }
 
-      // Refresh data
       await Promise.all([fetchEmployees(), fetchAllForDashboard()]);
       setIsFormModalOpen(false);
       setEmployeeToEdit(null);
     } catch (err) {
-      // Re-throw so modal can display inline error
       throw err;
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handler: Confirm Delete
   const handleConfirmDelete = async () => {
     if (!employeeToDelete) return;
 
     setIsSubmitting(true);
     try {
       const response = await employeeService.deleteEmployee(employeeToDelete._id);
-      showToast(
-        response.message || `Deleted employee ${employeeToDelete.name}`,
-        'success'
-      );
+      showToast(response.message || `Deleted employee ${employeeToDelete.name}`, 'success');
       setIsDeleteDialogOpen(false);
       setEmployeeToDelete(null);
 
-      // Refresh data
-      await Promise.all([fetchEmployees(), fetchAllForDashboard()]);
+      await Promise.all([fetchEmployees(), fetchAllForDashboard(), fetchTasks()]);
     } catch (err) {
       showToast(err.message || 'Failed to delete employee profile', 'error');
     } finally {
@@ -206,7 +214,70 @@ const MainApp = () => {
     }
   };
 
-  // Handler: Reset Filters
+  // Handlers for Task Modals
+  const handleOpenAddTask = () => {
+    setTaskToEdit(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleOpenEditTask = (task) => {
+    setTaskToEdit(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleOpenDeleteTask = (task) => {
+    setTaskToDelete(task);
+    setIsTaskDeleteDialogOpen(true);
+  };
+
+  const handleTaskFormSubmit = async (taskData) => {
+    setIsSubmitting(true);
+    try {
+      if (taskToEdit) {
+        const response = await taskService.updateTask(taskToEdit._id, taskData);
+        showToast(response.message || 'Task updated successfully', 'success');
+      } else {
+        const response = await taskService.createTask(taskData);
+        showToast(response.message || 'Task assigned successfully', 'success');
+      }
+
+      await fetchTasks();
+      setIsTaskModalOpen(false);
+      setTaskToEdit(null);
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTaskStatusChange = async (taskId, newStatus) => {
+    try {
+      await taskService.updateTask(taskId, { status: newStatus });
+      showToast(`Task status updated to ${newStatus}`, 'info');
+      await fetchTasks();
+    } catch (err) {
+      showToast(err.message || 'Failed to update task status', 'error');
+    }
+  };
+
+  const handleConfirmDeleteTask = async () => {
+    if (!taskToDelete) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await taskService.deleteTask(taskToDelete._id);
+      showToast(response.message || 'Task deleted successfully', 'success');
+      setIsTaskDeleteDialogOpen(false);
+      setTaskToDelete(null);
+      await fetchTasks();
+    } catch (err) {
+      showToast(err.message || 'Failed to delete task', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleResetFilters = () => {
     setSearchTerm('');
     setSelectedDepartment('');
@@ -215,7 +286,6 @@ const MainApp = () => {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  // Handler: Export CSV
   const handleExportCSV = () => {
     try {
       exportEmployeesToCSV(employees, `employees_export_${new Date().toISOString().slice(0, 10)}.csv`);
@@ -232,9 +302,11 @@ const MainApp = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={handleOpenAddModal}
+        onOpenAddTaskModal={handleOpenAddTask}
         onOpenDocs={() => setIsDocsOpen(true)}
         serverStatus={serverStatus}
         totalCount={allEmployees.length || pagination.total}
+        taskCount={tasks.length}
       />
 
       {/* Main Content Area */}
@@ -252,7 +324,7 @@ const MainApp = () => {
               setActiveTab('employees');
             }}
           />
-        ) : (
+        ) : activeTab === 'employees' ? (
           <EmployeesPage
             employees={employees}
             pagination={pagination}
@@ -279,6 +351,17 @@ const MainApp = () => {
             onViewEmployee={handleOpenDetailModal}
             onEditEmployee={handleOpenEditModal}
             onDeleteEmployee={handleOpenDeleteModal}
+          />
+        ) : (
+          <TasksPage
+            tasks={tasks}
+            employees={allEmployees}
+            isLoading={isTasksLoading}
+            onRefresh={fetchTasks}
+            onOpenAddTask={handleOpenAddTask}
+            onEditTask={handleOpenEditTask}
+            onDeleteTask={handleOpenDeleteTask}
+            onUpdateStatus={handleTaskStatusChange}
           />
         )}
       </main>
@@ -310,7 +393,20 @@ const MainApp = () => {
         onDelete={(emp) => handleOpenDeleteModal(emp)}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Create / Edit Task Modal */}
+      <TaskFormModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setTaskToEdit(null);
+        }}
+        onSubmit={handleTaskFormSubmit}
+        employees={allEmployees}
+        taskToEdit={taskToEdit}
+        isLoading={isSubmitting}
+      />
+
+      {/* Delete Employee Confirmation Dialog */}
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => {
@@ -328,6 +424,27 @@ const MainApp = () => {
         }
         confirmText="Yes, Delete Record"
         cancelText="Keep Record"
+        isDestructive={true}
+        isLoading={isSubmitting}
+      />
+
+      {/* Delete Task Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isTaskDeleteDialogOpen}
+        onClose={() => {
+          setIsTaskDeleteDialogOpen(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={handleConfirmDeleteTask}
+        title="Delete Task"
+        message={
+          <span>
+            Are you sure you want to delete the task{' '}
+            <strong className="text-slate-900">"{taskToDelete?.title}"</strong>?
+          </span>
+        }
+        confirmText="Yes, Delete Task"
+        cancelText="Cancel"
         isDestructive={true}
         isLoading={isSubmitting}
       />

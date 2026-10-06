@@ -42,6 +42,33 @@ const ENDPOINTS = [
     path: '/api/employees/:id',
     description: 'Permanently remove an employee profile from the database.',
     codes: ['200 OK', '400 Invalid ID', '404 Not Found']
+  },
+  {
+    method: 'POST',
+    path: '/api/tasks',
+    description: 'Create and assign a new workplace task to an employee.',
+    body: '{ "title": "...", "assignedTo": "<Employee_ID>", "priority": "High", "status": "Pending", "dueDate": "2026-10-15" }',
+    codes: ['201 Created', '400 Bad Request', '404 Employee Not Found']
+  },
+  {
+    method: 'GET',
+    path: '/api/tasks',
+    description: 'List and filter tasks by status, priority, or assignee with pagination.',
+    params: '?status=Pending&priority=High&assignedTo=<Employee_ID>',
+    codes: ['200 OK', '500 Server Error']
+  },
+  {
+    method: 'PUT',
+    path: '/api/tasks/:id',
+    description: 'Update task details, assignment, or completion status.',
+    body: '{ "status": "Completed" }',
+    codes: ['200 OK', '400 Invalid ID', '404 Not Found']
+  },
+  {
+    method: 'DELETE',
+    path: '/api/tasks/:id',
+    description: 'Delete a task from the database.',
+    codes: ['200 OK', '400 Invalid ID', '404 Not Found']
   }
 ];
 

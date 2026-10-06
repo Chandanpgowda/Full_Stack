@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Users2,
   LayoutDashboard,
@@ -5,7 +6,9 @@ import {
   Activity,
   CheckCircle2,
   AlertCircle,
-  Code2
+  Code2,
+  CheckSquare,
+  Plus
 } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -13,9 +16,11 @@ export const Navbar = ({
   activeTab,
   setActiveTab,
   onOpenAddModal,
+  onOpenAddTaskModal,
   onOpenDocs,
   serverStatus,
-  totalCount = 0
+  totalCount = 0,
+  taskCount = 0
 }) => {
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
@@ -38,7 +43,7 @@ export const Navbar = ({
                   </span>
                 </span>
                 <p className="text-[11px] text-slate-500 hidden sm:block">
-                  Enterprise Employee Management
+                  Workforce & Task Management
                 </p>
               </div>
             </div>
@@ -75,10 +80,28 @@ export const Navbar = ({
                   </span>
                 )}
               </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('tasks')}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'tasks'
+                    ? 'bg-indigo-50 text-indigo-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                }`}
+              >
+                <CheckSquare className="w-4 h-4" />
+                Tasks
+                {taskCount > 0 && (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 ml-0.5">
+                    {taskCount}
+                  </span>
+                )}
+              </button>
             </nav>
           </div>
 
-          {/* Right Section: System Health & Add Employee Button */}
+          {/* Right Section: System Health & Add Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* API Docs Button */}
             <button
@@ -116,7 +139,18 @@ export const Navbar = ({
               <span className="capitalize">{serverStatus}</span>
             </div>
 
-            {/* Quick Add Button */}
+            {/* Quick Add Task Button */}
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={Plus}
+              onClick={onOpenAddTaskModal}
+              className="hidden sm:inline-flex"
+            >
+              Add Task
+            </Button>
+
+            {/* Quick Add Employee Button */}
             <Button
               variant="primary"
               size="sm"
@@ -134,7 +168,7 @@ export const Navbar = ({
           <button
             type="button"
             onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
               activeTab === 'dashboard'
                 ? 'bg-indigo-50 text-indigo-700'
                 : 'text-slate-600'
@@ -146,7 +180,7 @@ export const Navbar = ({
           <button
             type="button"
             onClick={() => setActiveTab('employees')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
               activeTab === 'employees'
                 ? 'bg-indigo-50 text-indigo-700'
                 : 'text-slate-600'
@@ -154,6 +188,18 @@ export const Navbar = ({
           >
             <Users2 className="w-3.5 h-3.5" />
             Directory ({totalCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('tasks')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              activeTab === 'tasks'
+                ? 'bg-indigo-50 text-indigo-700'
+                : 'text-slate-600'
+            }`}
+          >
+            <CheckSquare className="w-3.5 h-3.5" />
+            Tasks ({taskCount})
           </button>
         </div>
       </div>
