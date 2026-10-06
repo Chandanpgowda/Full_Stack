@@ -133,24 +133,52 @@ export const AuthPage = ({ onAuthenticated }) => {
   // Dynamically load Google GSI SDK if available
   useEffect(() => {
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (googleClientId && !window.google) {
+    if (!googleClientId) return;
+
+    const initGoogle = () => {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false
+        });
+        window.google.accounts.id.prompt();
+      } catch (e) {
+        console.warn('Google GSI init warning:', e);
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      initGoogle();
+    } else {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: googleClientId,
-            callback: handleGoogleCredentialResponse
-          });
-        } catch (e) {
-          console.warn('Google GSI init warning:', e);
-        }
-      };
+      script.onload = initGoogle;
       document.body.appendChild(script);
     }
   }, []);
+
+  // Render official Google button inside modal when opened
+  useEffect(() => {
+    if (isGoogleModalOpen && window.google?.accounts?.id) {
+      const timer = setTimeout(() => {
+        const btnElem = document.getElementById('g_id_signin_modal_btn');
+        if (btnElem) {
+          btnElem.innerHTML = '';
+          window.google.accounts.id.renderButton(btnElem, {
+            theme: 'filled_black',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'pill',
+            width: 300
+          });
+        }
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [isGoogleModalOpen]);
 
   const handleGoogleCredentialResponse = async (response) => {
     try {
@@ -661,7 +689,7 @@ export const AuthPage = ({ onAuthenticated }) => {
             </button>
 
             {/* Header */}
-            <div className="flex flex-col items-center text-center mb-6 pt-2">
+            <div className="flex flex-col items-center text-center mb-5 pt-2">
               <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 shadow-md">
                 <GoogleIcon className="w-6 h-6" />
               </div>
@@ -672,6 +700,9 @@ export const AuthPage = ({ onAuthenticated }) => {
                 Choose an account to continue to EMS Portal
               </p>
             </div>
+
+            {/* Official Google GSI Button Container (rendered when Google SDK loads) */}
+            <div id="g_id_signin_modal_btn" className="flex justify-center mb-4 min-h-[40px]"></div>
 
             {/* Quick 1-Click Google Accounts */}
             <div className="flex flex-col gap-2 mb-4">

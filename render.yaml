@@ -11,9 +11,15 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false # Paste your MongoDB Atlas URI in Render dashboard
+        sync: false # Set in Render Dashboard
       - key: CLIENT_ORIGIN
         value: "*"
+      - key: GOOGLE_CLIENT_ID
+        sync: false # Set in Render Dashboard
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false # Set in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true
 
   # ── Frontend Static Site (Vite React) ──────────────────
   - type: web
@@ -29,3 +35,5 @@ services:
     envVars:
       - key: VITE_API_BASE_URL
         sync: false # Set in Render dashboard: https://ems-backend.onrender.com/api
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false # Set in Render Dashboard
