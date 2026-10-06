@@ -72,128 +72,10 @@ export const AuthPage = ({ onAuthenticated }) => {
   const [showPwd, setShowPwd] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
-  const [gsiBtnReady, setGsiBtnReady] = useState(false);
-
-  const googleBtnRef = useRef(null);
-  // Use a ref for the credential callback so GSI.initialize() is never called twice
-  const credentialCallbackRef = useRef(null);
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-
-  /* ── Google credential callback (stable ref – never recreated) ── */
-  const handleGoogleCredentialResponse = useCallback(async (response) => {
-    try {
-      setIsLoading(true);
-      setServerError('');
-
-      if (!response || !response.credential) {
-        throw new Error('Google authentication returned no credential. Please try again.');
-      }
-
-      const payload = { credential: response.credential };
-
-      // Helper to safely parse Google JWT on frontend as robust fallback
-      try {
-        const parts = response.credential.split('.');
-        if (parts.length === 3) {
-          const base64Url = parts[1];
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const jsonPayload = decodeURIComponent(
-            atob(base64)
-              .split('')
-              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-              .join('')
-          );
-          const decoded = JSON.parse(jsonPayload);
-          if (decoded && decoded.email) {
-            payload.email = decoded.email;
-            payload.name = decoded.name;
-            payload.avatar = decoded.picture;
-            payload.googleId = decoded.sub;
-          }
-        }
-      } catch (e) {
-        console.warn('Client-side Google credential decode warning:', e);
-      }
-
-      const data = await authService.googleAuth(payload);
-      localStorage.setItem('ems_token', data.token);
-      localStorage.setItem('ems_user', JSON.stringify(data.user));
-      showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
-      onAuthenticated(data.user);
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Google authentication failed. Try again.';
-      setServerError(msg);
-      showToast(msg, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onAuthenticated, showToast]);
-
-  // Keep the ref in sync with the latest callback without triggering re-initialization
-  useEffect(() => { credentialCallbackRef.current = handleGoogleCredentialResponse; }, [handleGoogleCredentialResponse]);
-
-  /* ── Load Google GSI SDK & initialize ONCE ── */
-  useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      console.warn('VITE_GOOGLE_CLIENT_ID not set – Google Sign-In unavailable');
-      return;
-    }
-
-    // Wrapper that delegates to the latest ref — avoids reinitializing GSI
-    const stableCallback = (resp) => credentialCallbackRef.current?.(resp);
-
-    const initGoogle = () => {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: stableCallback,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          use_fedcm_for_prompt: false, // disable FedCM to avoid navigator.credentials conflicts
-          ux_mode: 'popup',
-        });
-        setGsiBtnReady(true);
-      } catch (e) {
-        console.error('Google GSI init error:', e);
-      }
-    };
-
-    if (window.google?.accounts?.id) {
-      initGoogle();
-    } else if (!document.getElementById('google-gsi-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-gsi-script';
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      script.onerror = () => console.error('Failed to load Google GSI script');
-      document.body.appendChild(script);
-    }
-  }, []); // ← empty deps: runs exactly once on mount
-
-  /* ── Render official Google button whenever container is ready ── */
-  useEffect(() => {
-    if (!gsiBtnReady || !googleBtnRef.current) return;
-    try {
-      googleBtnRef.current.innerHTML = '';
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
-        type: 'standard',
-        theme: 'filled_black',
-        size: 'large',
-        text: 'continue_with',
-        shape: 'pill',
-        logo_alignment: 'left',
-        width: 280,
-      });
-    } catch (e) {
-      console.warn('renderButton error:', e);
-    }
-  }, [gsiBtnReady, mode]);
 
   /* ── validation ── */
   const validate = (data, m) => {
@@ -399,35 +281,6 @@ export const AuthPage = ({ onAuthenticated }) => {
                 <span>{serverError}</span>
               </div>
             )}
-
-            {/* ── OAuth Buttons ── */}
-            <div className="flex flex-col gap-3 mb-6">
-              {/* Official Google Sign-In Button rendered by Google GSI SDK */}
-              <div className="flex items-center justify-center min-h-[44px]">
-                {gsiBtnReady ? (
-                  /* Real Google button injected here — opens native Google account picker */
-                  <div ref={googleBtnRef} className="flex justify-center w-full" />
-                ) : (
-                  /* Fallback skeleton while SDK loads */
-                  <div className="w-full h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center gap-2.5 text-sm text-slate-500 animate-pulse">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24">
-                      <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
-                      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
-                      <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
-                      <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
-                    </svg>
-                    Loading Google…
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ── Divider ── */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-1 h-px bg-white/8" />
-              <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-widest">or continue with email</span>
-              <div className="flex-1 h-px bg-white/8" />
-            </div>
 
             {/* ── Form ── */}
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">

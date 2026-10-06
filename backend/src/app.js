@@ -11,9 +11,34 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const app = express();
 
 // Global Middlewares
+// When credentials are enabled (for cookies / Authorization headers), the CORS
+// spec forbids '*'. Reflect the request origin or use an explicit allow-list.
 const corsOrigin = process.env.CLIENT_ORIGIN;
+
+const corsOptionDelegate = (origin, callback) => {
+  // Allow requests with no Origin (mobile apps, curl, same-origin server renders)
+  if (!origin || origin === 'null') {
+    return callback(null, true);
+  }
+
+  if (!corsOrigin) {
+    // No allow-list configured — reflect the request origin (dev fallback)
+    return callback(null, true);
+  }
+
+  const allowed = corsOrigin.includes(',')
+    ? corsOrigin.split(',').map((s) => s.trim())
+    : corsOrigin;
+
+  if (allowed === '*' || allowed.includes(origin)) {
+    return callback(null, true);
+  }
+
+  return callback(new Error('Not allowed by CORS'));
+};
+
 app.use(cors({
-  origin: corsOrigin ? (corsOrigin.includes(',') ? corsOrigin.split(',').map(s => s.trim()) : corsOrigin) : '*',
+  origin: corsOptionDelegate,
   credentials: true
 }));
 app.use(express.json());

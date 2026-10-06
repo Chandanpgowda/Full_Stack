@@ -13,7 +13,7 @@ services:
       - key: MONGODB_URI
         sync: false # Set in Render Dashboard
       - key: CLIENT_ORIGIN
-        value: "*"
+        value: "https://ems-frontend.onrender.com"
       - key: GOOGLE_CLIENT_ID
         sync: false # Set in Render Dashboard
       - key: GOOGLE_CLIENT_SECRET
