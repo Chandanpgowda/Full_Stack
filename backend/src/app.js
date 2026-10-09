@@ -11,30 +11,56 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const app = express();
 
 // Global Middlewares
-// When credentials are enabled (for cookies / Authorization headers), the CORS
-// spec forbids '*'. Reflect the request origin or use an explicit allow-list.
-const corsOrigin = process.env.CLIENT_ORIGIN;
-
-const corsOptionDelegate = (origin, callback) => {
-  // Allow requests with no Origin (mobile apps, curl, same-origin server renders)
-  if (!origin || origin === 'null') {
+// Dynamic CORS Delegate supporting multiple origins, trailing slashes,
+// wildcard domains (*.onrender.com, *.vercel.app), Render subdomains, and dev origins.
+const corsOptionDelegate = (reqOrigin, callback) => {
+  // Allow requests with no Origin (mobile apps, curl, Postman, server-to-server)
+  if (!reqOrigin || reqOrigin === 'null') {
     return callback(null, true);
   }
 
-  if (!corsOrigin) {
-    // No allow-list configured — reflect the request origin (dev fallback)
+  const corsOrigin = process.env.CLIENT_ORIGIN;
+
+  // If CLIENT_ORIGIN is not configured or set to '*', allow all origins
+  if (!corsOrigin || corsOrigin.trim() === '*') {
     return callback(null, true);
   }
 
-  const allowed = corsOrigin.includes(',')
-    ? corsOrigin.split(',').map((s) => s.trim())
-    : corsOrigin;
+  const cleanReqOrigin = reqOrigin.trim().replace(/\/+$/, '').toLowerCase();
 
-  if (allowed === '*' || allowed.includes(origin)) {
+  // Split comma-separated allowed origins and normalize
+  const allowedOrigins = corsOrigin
+    .split(',')
+    .map((s) => s.trim().replace(/\/+$/, '').toLowerCase())
+    .filter(Boolean);
+
+  const isAllowed = allowedOrigins.some((allowed) => {
+    if (allowed === cleanReqOrigin) return true;
+
+    // Support wildcard patterns like *.onrender.com or *.vercel.app
+    if (allowed.startsWith('*.')) {
+      const domain = allowed.slice(2);
+      return cleanReqOrigin.endsWith('.' + domain) || cleanReqOrigin.endsWith('://' + domain);
+    }
+
+    // Support matching any .onrender.com domain if 'onrender.com' is listed
+    if (allowed === 'onrender.com') {
+      return cleanReqOrigin.endsWith('.onrender.com');
+    }
+
+    return false;
+  });
+
+  // Render & Localhost fallbacks: automatically allow .onrender.com subdomains & localhost
+  const isRenderDomain = cleanReqOrigin.endsWith('.onrender.com');
+  const isLocalhost = cleanReqOrigin.includes('localhost') || cleanReqOrigin.includes('127.0.0.1');
+
+  if (isAllowed || isRenderDomain || isLocalhost) {
     return callback(null, true);
   }
 
-  return callback(new Error('Not allowed by CORS'));
+  // Deny cleanly without throwing a 500 server error
+  return callback(null, false);
 };
 
 app.use(cors({
