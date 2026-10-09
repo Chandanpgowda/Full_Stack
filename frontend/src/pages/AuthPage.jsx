@@ -118,6 +118,9 @@ export const AuthPage = ({ onAuthenticated }) => {
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           callback: handleGoogleResponse,
+          use_fedcm_for_prompt: true,
+          ux_mode: 'popup',
+          itp_support: true,
         });
 
         googleBtnRef.current.innerHTML = '';

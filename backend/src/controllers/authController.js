@@ -172,6 +172,15 @@ exports.googleAuth = async (req, res, next) => {
   try {
     const { credential, email, name, avatar, googleId } = req.body;
 
+    // Debug logging for production troubleshooting
+    console.log('[GoogleAuth] Received fields:', {
+      hasCredential: !!credential,
+      credentialLength: credential ? credential.length : 0,
+      email: email || '(none)',
+      name: name || '(none)',
+      hasGoogleId: !!googleId
+    });
+
     let userEmail = email || '';
     let userName = name || '';
     let userAvatar = avatar || '';
@@ -180,6 +189,7 @@ exports.googleAuth = async (req, res, next) => {
     // If Google ID token credential was sent directly from Google One-Tap or Google GSI
     if (credential) {
       const decoded = decodeGoogleCredential(credential);
+      console.log('[GoogleAuth] Decoded credential:', decoded ? { email: decoded.email, name: decoded.name, sub: decoded.sub } : 'DECODE_FAILED');
       if (decoded && decoded.email) {
         userEmail = userEmail || decoded.email;
         userName = userName || decoded.name || decoded.email.split('@')[0];
@@ -191,7 +201,8 @@ exports.googleAuth = async (req, res, next) => {
     if (!userEmail) {
       return res.status(400).json({
         success: false,
-        message: 'Google authentication payload missing valid email'
+        message: 'Google authentication payload missing valid email. Ensure Google Sign-In is configured correctly.',
+        debug: { hasCredential: !!credential, credentialLength: credential ? credential.length : 0 }
       });
     }
 
